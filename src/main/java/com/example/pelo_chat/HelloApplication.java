@@ -101,7 +101,7 @@ public class HelloApplication extends Application {
         HBox recvRow2 = new HBox(recv2);
         recvRow2.setAlignment(Pos.CENTER_LEFT);
 
-        Label sent2 = PeloTheme.bubbleSent("Bien sûr, je prépare une synthèse de 5 minutes 👍");
+        Label sent2 = PeloTheme.bubbleSent("Bien sûr, je prépare une synthèse de 5 minutes ");
         sent2.setMaxWidth(420);
         HBox sentRow2 = new HBox(sent2);
         sentRow2.setAlignment(Pos.CENTER_RIGHT);
