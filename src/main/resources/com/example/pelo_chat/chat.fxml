@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="10" style="-fx-padding: 10;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pelo_chat.controller.ChatController">
+
+    <Label fx:id="statusLabel" text="..." />
+
+    <ListView fx:id="messageList" VBox.vgrow="ALWAYS" />
+
+    <HBox spacing="8">
+        <TextField fx:id="recipientField" prefWidth="150" promptText="Destinataire" />
+        <TextField fx:id="messageField" promptText="Message..." HBox.hgrow="ALWAYS" />
+        <Button text="Envoyer" />
+    </HBox>
+
+    <Button text="Déconnexion" />
+</VBox>

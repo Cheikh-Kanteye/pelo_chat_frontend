@@ -1,15 +1,18 @@
 package com.example.pelo_chat.view;
 
-import com.example.pelo_chat.HelloApplication;
+
 import com.example.pelo_chat.PeloTheme;
+import com.example.pelo_chat.controller.ChatController;
+import com.example.pelo_chat.service.SocketService;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -26,27 +29,28 @@ public class AuthScreen {
 
     private final Stage stage;
     private boolean isLoginMode = true;
+    private final SocketService socketService = new SocketService();
 
     // Refs mutables (mises à jour lors du basculement de mode)
     private Label cardTitle;
     private Label cardSubtitle;
     private Label switchPromptLabel;
     private Label switchLinkLabel;
-    private VBox  formContent;
+    private VBox formContent;
 
     // Champs de formulaire (créés une fois, réutilisés)
-    private final TextField     usernameField = makeField("Nom d'utilisateur");
+    private final TextField usernameField = makeField("Nom d'utilisateur");
     private final PasswordField passwordField = makePassField("Mot de passe");
-    private final TextField     fullNameField = makeField("Nom complet");
-    private final PasswordField confirmField  = makePassField("Confirmer le mot de passe");
-    private final Label         errorLabel    = makeErrorLabel();
+    private final TextField fullNameField = makeField("Nom complet");
+    private final PasswordField confirmField = makePassField("Confirmer le mot de passe");
+    private final Label errorLabel = makeErrorLabel();
 
     public AuthScreen(Stage stage) {
         this.stage = stage;
     }
 
     // ═══════════════════════════════════════════════════════
-    //  BUILD SCENE
+    // BUILD SCENE
     // ═══════════════════════════════════════════════════════
 
     public Scene build() {
@@ -57,38 +61,34 @@ public class AuthScreen {
     }
 
     // ═══════════════════════════════════════════════════════
-    //  PANNEAU GAUCHE — Branding
+    // PANNEAU GAUCHE — Branding
     // ═══════════════════════════════════════════════════════
 
     private VBox buildLeftPanel() {
         // ── Wordmark ───────────────────────────────────────
         Label wordmark = new Label("P E L O");
         wordmark.setStyle(
-            "-fx-font-family:'Montserrat';-fx-font-size:34px;-fx-font-weight:900;" +
-            "-fx-text-fill:white;"
-        );
+                "-fx-font-family:'Montserrat';-fx-font-size:34px;-fx-font-weight:900;" +
+                        "-fx-text-fill:white;");
 
         Label badge = new Label("Professional Messaging");
         badge.setStyle(
-            "-fx-font-family:'Montserrat';-fx-font-size:10px;-fx-font-weight:bold;" +
-            "-fx-text-fill:#1A1A00;-fx-background-color:#FDEF42;" +
-            "-fx-background-radius:20px;-fx-padding:4px 12px;"
-        );
+                "-fx-font-family:'Montserrat';-fx-font-size:10px;-fx-font-weight:bold;" +
+                        "-fx-text-fill:#1A1A00;-fx-background-color:#FDEF42;" +
+                        "-fx-background-radius:20px;-fx-padding:4px 12px;");
 
         VBox topBrand = new VBox(10, wordmark, badge);
 
         // ── Tagline centrale ───────────────────────────────
         Label tagline = new Label("Xam Xam\nak Teggin");
         tagline.setStyle(
-            "-fx-font-family:'Montserrat';-fx-font-size:26px;-fx-font-weight:bold;" +
-            "-fx-text-fill:white;-fx-wrap-text:true;"
-        );
+                "-fx-font-family:'Montserrat';-fx-font-size:26px;-fx-font-weight:bold;" +
+                        "-fx-text-fill:white;-fx-wrap-text:true;");
 
         Label sub = new Label("Connect with Purpose");
         sub.setStyle(
-            "-fx-font-family:'Nunito';-fx-font-size:13px;" +
-            "-fx-text-fill:rgba(255,255,255,0.60);"
-        );
+                "-fx-font-family:'Nunito';-fx-font-size:13px;" +
+                        "-fx-text-fill:rgba(255,255,255,0.60);");
 
         VBox taglineBox = new VBox(8, tagline, sub);
 
@@ -99,49 +99,45 @@ public class AuthScreen {
         div.setMaxWidth(160);
 
         HBox avatarRow = new HBox(-8,
-            PeloTheme.avatar("AB", PeloTheme.Styles.AVATAR_SM, PeloTheme.Styles.AVATAR_GREEN),
-            PeloTheme.avatar("NF", PeloTheme.Styles.AVATAR_SM, PeloTheme.Styles.AVATAR_PURPLE),
-            PeloTheme.avatar("KS", PeloTheme.Styles.AVATAR_SM, PeloTheme.Styles.AVATAR_RED),
-            PeloTheme.avatar("DK", PeloTheme.Styles.AVATAR_SM, PeloTheme.Styles.AVATAR_GOLD),
-            PeloTheme.avatar("MM", PeloTheme.Styles.AVATAR_SM, PeloTheme.Styles.AVATAR_TEAL)
-        );
+                PeloTheme.avatar("AB", PeloTheme.Styles.AVATAR_SM, PeloTheme.Styles.AVATAR_GREEN),
+                PeloTheme.avatar("NF", PeloTheme.Styles.AVATAR_SM, PeloTheme.Styles.AVATAR_PURPLE),
+                PeloTheme.avatar("KS", PeloTheme.Styles.AVATAR_SM, PeloTheme.Styles.AVATAR_RED),
+                PeloTheme.avatar("DK", PeloTheme.Styles.AVATAR_SM, PeloTheme.Styles.AVATAR_GOLD),
+                PeloTheme.avatar("MM", PeloTheme.Styles.AVATAR_SM, PeloTheme.Styles.AVATAR_TEAL));
         avatarRow.setAlignment(Pos.CENTER_LEFT);
 
         Label members = new Label("+ 2 400 professionnels connectés");
         members.setStyle(
-            "-fx-font-family:'Nunito';-fx-font-size:11px;" +
-            "-fx-text-fill:rgba(255,255,255,0.50);"
-        );
+                "-fx-font-family:'Nunito';-fx-font-size:11px;" +
+                        "-fx-text-fill:rgba(255,255,255,0.50);");
 
         VBox bottomDeco = new VBox(8, div, avatarRow, members);
 
         // ── Assemblage ─────────────────────────────────────
         VBox panel = new VBox(
-            topBrand,
-            PeloTheme.spacer(),
-            taglineBox,
-            PeloTheme.spacer(),
-            bottomDeco
-        );
+                topBrand,
+                PeloTheme.spacer(),
+                taglineBox,
+                PeloTheme.spacer(),
+                bottomDeco);
         panel.setPadding(new Insets(48, 40, 40, 40));
         panel.setPrefWidth(380);
         panel.setMinWidth(380);
         panel.setMaxWidth(380);
         panel.setStyle(
-            "-fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #1A2535, #006B32);"
-        );
+                "-fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #1A2535, #006B32);");
         return panel;
     }
 
     // ═══════════════════════════════════════════════════════
-    //  PANNEAU DROIT — Formulaire
+    // PANNEAU DROIT — Formulaire
     // ═══════════════════════════════════════════════════════
 
     private VBox buildRightPanel() {
         // ── En-tête de la carte ────────────────────────────
         Label logoIcon = PeloTheme.avatar("P", PeloTheme.Styles.AVATAR_SM, PeloTheme.Styles.AVATAR_GREEN);
 
-        cardTitle    = PeloTheme.titleXl("Connexion");
+        cardTitle = PeloTheme.titleXl("Connexion");
         cardSubtitle = PeloTheme.body("Bienvenue ! Entrez vos identifiants.");
         cardSubtitle.setWrapText(true);
         cardSubtitle.setMaxWidth(280);
@@ -153,7 +149,7 @@ public class AuthScreen {
 
         // ── Lien de basculement ────────────────────────────
         switchPromptLabel = PeloTheme.body("Pas encore de compte ?");
-        switchLinkLabel   = new Label("S'inscrire");
+        switchLinkLabel = new Label("S'inscrire");
         switchLinkLabel.getStyleClass().add("pelo-auth-link");
         switchLinkLabel.setCursor(Cursor.HAND);
         switchLinkLabel.setOnMouseClicked(e -> toggleMode());
@@ -166,12 +162,11 @@ public class AuthScreen {
         card.setPrefWidth(320);
         card.setMaxWidth(320);
         card.setStyle(
-            "-fx-background-color: white;" +
-            "-fx-background-radius: 20px;" +
-            "-fx-border-radius: 20px;" +
-            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 24, 0.0, 0, 6);" +
-            "-fx-padding: 32px;"
-        );
+                "-fx-background-color: white;" +
+                        "-fx-background-radius: 20px;" +
+                        "-fx-border-radius: 20px;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 24, 0.0, 0, 6);" +
+                        "-fx-padding: 32px;");
 
         // Remplir avec le formulaire de connexion initial
         renderLoginForm();
@@ -186,7 +181,7 @@ public class AuthScreen {
     }
 
     // ═══════════════════════════════════════════════════════
-    //  RENDERERS DE FORMULAIRE
+    // RENDERERS DE FORMULAIRE
     // ═══════════════════════════════════════════════════════
 
     private void renderLoginForm() {
@@ -202,11 +197,10 @@ public class AuthScreen {
         btn.setOnAction(e -> handleLogin());
 
         formContent.getChildren().setAll(
-            usernameField,
-            passwordField,
-            errorLabel,
-            btn
-        );
+                usernameField,
+                passwordField,
+                errorLabel,
+                btn);
     }
 
     private void renderRegisterForm() {
@@ -222,35 +216,50 @@ public class AuthScreen {
         btn.setOnAction(e -> handleRegister());
 
         formContent.getChildren().setAll(
-            fullNameField,
-            usernameField,
-            passwordField,
-            confirmField,
-            errorLabel,
-            btn
-        );
+                fullNameField,
+                usernameField,
+                passwordField,
+                confirmField,
+                errorLabel,
+                btn);
     }
 
     private void toggleMode() {
-        if (isLoginMode) renderRegisterForm();
-        else             renderLoginForm();
+        if (isLoginMode)
+            renderRegisterForm();
+        else
+            renderLoginForm();
     }
 
     // ═══════════════════════════════════════════════════════
-    //  HANDLERS (UI only — pas de backend pour le moment)
+    // HANDLERS (UI only — pas de backend pour le moment)
     // ═══════════════════════════════════════════════════════
 
     private void handleLogin() {
-        if (usernameField.getText().trim().isEmpty() || passwordField.getText().isEmpty()) {
+        String username = usernameField.getText().trim();
+        if (username.isEmpty() || passwordField.getText().isEmpty()) {
             showError("Veuillez remplir tous les champs.");
             return;
         }
-        navigateToMain(usernameField.getText().trim());
+
+        try {
+            socketService.connect(packet -> {
+                if ("ACK".equals(packet.getAction())) {
+                    navigateToMain(username);
+                } else {
+                    showError(packet.getContent());
+                }
+            });
+            socketService.login(username, passwordField.getText());
+        } catch (Exception e) {
+            showError("Impossible de joindre le serveur");
+        }
     }
 
     private void handleRegister() {
+        String username = usernameField.getText().trim();
         if (fullNameField.getText().trim().isEmpty()
-                || usernameField.getText().trim().isEmpty()
+                || username.isEmpty()
                 || passwordField.getText().isEmpty()
                 || confirmField.getText().isEmpty()) {
             showError("Veuillez remplir tous les champs.");
@@ -264,22 +273,41 @@ public class AuthScreen {
             showError("Le mot de passe doit contenir au moins 6 caractères.");
             return;
         }
-        navigateToMain(usernameField.getText().trim());
+
+        try {
+            socketService.connect(packet -> {
+                if ("REGISTER_OK".equals(packet.getAction())) { // ← REGISTER_OK pas ACK
+                    showError("Inscription réussie ! Connectez-vous.");
+                    toggleMode(); // bascule vers le formulaire de connexion
+                } else {
+                    showError(packet.getContent());
+                }
+            });
+            socketService.register(username, passwordField.getText());
+        } catch (Exception e) {
+            showError("Impossible de joindre le serveur");
+        }
     }
 
-    /** Navigation vers l'interface principale (design system showcase en attendant la vraie UI). */
+    /** Navigation vers l'interface principale. */
     private void navigateToMain(String username) {
-        ScrollPane showcase = new ScrollPane(HelloApplication.buildShowcase());
-        showcase.setFitToWidth(true);
-        showcase.setStyle("-fx-background-color:" + PeloTheme.Colors.SURFACE_LIST + ";");
-        stage.getScene().setRoot(showcase);
-        stage.setTitle("PELO — " + username);
-        stage.setWidth(960);
-        stage.setHeight(680);
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pelo_chat/chat.fxml"));
+            Parent root = loader.load();
+
+            ChatController ctrl = loader.getController();
+            ctrl.init(username, socketService);
+
+            stage.setScene(new Scene(root, 960, 680));
+            stage.setTitle("PELO — " + username);
+        } catch (Exception e) {
+            showError("Erreur lors du chargement de l'interface : " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     // ═══════════════════════════════════════════════════════
-    //  GESTION DES ERREURS
+    // GESTION DES ERREURS
     // ═══════════════════════════════════════════════════════
 
     private void showError(String msg) {
@@ -301,7 +329,7 @@ public class AuthScreen {
     }
 
     // ═══════════════════════════════════════════════════════
-    //  FABRIQUES DE COMPOSANTS
+    // FABRIQUES DE COMPOSANTS
     // ═══════════════════════════════════════════════════════
 
     private static Button authButton(String text) {
