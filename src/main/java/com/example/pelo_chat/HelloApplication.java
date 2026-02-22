@@ -19,21 +19,16 @@ public class HelloApplication extends Application {
 
     @Override
     public void start(Stage stage) {
-        ScrollPane scroll = new ScrollPane(buildShowcase());
-        scroll.setFitToWidth(true);
-        scroll.setStyle("-fx-background-color: " + PeloTheme.Colors.SURFACE_LIST + ";");
+        AuthScreen auth = new AuthScreen(stage);
 
-        Scene scene = new Scene(scroll, 960, 680);
-        PeloTheme.applyTo(scene);
-
-        stage.setTitle("PELO — Design System v1.0");
-        stage.setMinWidth(800);
-        stage.setMinHeight(600);
-        stage.setScene(scene);
+        stage.setTitle("PELO — Connexion");
+        stage.setMinWidth(700);
+        stage.setMinHeight(500);
+        stage.setScene(auth.build());
         stage.show();
     }
 
-    private VBox buildShowcase() {
+    public static VBox buildShowcase() {
         VBox root = new VBox(28);
         root.setPadding(new Insets(36));
         root.setStyle("-fx-background-color: " + PeloTheme.Colors.SURFACE_LIST + ";");
