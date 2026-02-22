@@ -1,5 +1,7 @@
-package com.example.pelo_chat;
+package com.example.pelo_chat.view;
 
+import com.example.pelo_chat.HelloApplication;
+import com.example.pelo_chat.PeloTheme;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
