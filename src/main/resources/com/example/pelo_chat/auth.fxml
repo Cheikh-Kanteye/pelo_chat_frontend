@@ -11,7 +11,7 @@
 
 <HBox prefHeight="580.0" prefWidth="900.0"
       stylesheets="@pelo-theme.css"
-      xmlns="http://javafx.com/javafx/25"
+      xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.example.pelo_chat.controller.AuthController">
 
