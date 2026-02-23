@@ -1,9 +1,11 @@
 package com.example.pelo_chat;
 
-import com.example.pelo_chat.view.AuthScreen;
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
@@ -17,13 +19,15 @@ import javafx.stage.Stage;
 public class HelloApplication extends Application {
 
     @Override
-    public void start(Stage stage) {
-        AuthScreen auth = new AuthScreen(stage);
+    public void start(Stage stage) throws Exception {
+        FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/com/example/pelo_chat/auth.fxml"));
+        Parent root = loader.load();
 
         stage.setTitle("PELO — Connexion");
         stage.setMinWidth(700);
         stage.setMinHeight(500);
-        stage.setScene(auth.build());
+        stage.setScene(new Scene(root));
         stage.show();
     }
 

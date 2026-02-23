@@ -61,6 +61,11 @@ public class SocketService {
         send(new Packet("REGISTER", username, null, password));
     }
 
+    /** Demande au serveur la liste de tous les utilisateurs (hors soi-même). */
+    public void requestUsers(String username) {
+        send(new Packet("GET_USERS", username, null, null));
+    }
+
     public void send(Packet packet) {
         if (writer != null) {
             writer.println(gson.toJson(packet));

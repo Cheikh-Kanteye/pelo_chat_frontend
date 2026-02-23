@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox prefHeight="580.0" prefWidth="900.0"
+      stylesheets="@pelo-theme.css"
+      xmlns="http://javafx.com/javafx/25"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.pelo_chat.controller.AuthController">
+
+   <!-- ═══════════════════════════════════════════════════════
+        PANNEAU GAUCHE — Branding
+        ═══════════════════════════════════════════════════════ -->
+   <VBox prefWidth="380.0" minWidth="380.0" maxWidth="380.0"
+         style="-fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #1A2535, #006B32);">
+      <padding><Insets top="48" right="40" bottom="40" left="40"/></padding>
+      <children>
+
+         <!-- Wordmark + Badge -->
+         <VBox spacing="10">
+            <Label text="P E L O"
+                   style="-fx-font-family:'Montserrat';-fx-font-size:34px;-fx-font-weight:900;-fx-text-fill:white;"/>
+            <Label text="Professional Messaging"
+                   style="-fx-font-family:'Montserrat';-fx-font-size:10px;-fx-font-weight:bold;-fx-text-fill:#1A1A00;-fx-background-color:#FDEF42;-fx-background-radius:20px;-fx-padding:4px 12px;"/>
+         </VBox>
+
+         <Region VBox.vgrow="ALWAYS"/>
+
+         <!-- Tagline centrale -->
+         <VBox spacing="8">
+            <Label text="Xam Xam&#10;ak Teggin" wrapText="true"
+                   style="-fx-font-family:'Montserrat';-fx-font-size:26px;-fx-font-weight:bold;-fx-text-fill:white;"/>
+            <Label text="Connect with Purpose"
+                   style="-fx-font-family:'Nunito';-fx-font-size:13px;-fx-text-fill:rgba(255,255,255,0.60);"/>
+         </VBox>
+
+         <Region VBox.vgrow="ALWAYS"/>
+
+         <!-- Décoration bas : divider + avatars + membres -->
+         <VBox spacing="8">
+            <Region prefHeight="1.0" maxWidth="160.0"
+                    style="-fx-background-color:rgba(255,255,255,0.15);"/>
+
+            <HBox alignment="CENTER_LEFT">
+               <Label styleClass="pelo-avatar, pelo-avatar-sm, pelo-avatar-green"   text="AB"/>
+               <Label styleClass="pelo-avatar, pelo-avatar-sm, pelo-avatar-purple"  text="NF">
+                  <HBox.margin><Insets left="-8.0"/></HBox.margin>
+               </Label>
+               <Label styleClass="pelo-avatar, pelo-avatar-sm, pelo-avatar-red"     text="KS">
+                  <HBox.margin><Insets left="-8.0"/></HBox.margin>
+               </Label>
+               <Label styleClass="pelo-avatar, pelo-avatar-sm, pelo-avatar-gold"    text="DK">
+                  <HBox.margin><Insets left="-8.0"/></HBox.margin>
+               </Label>
+               <Label styleClass="pelo-avatar, pelo-avatar-sm, pelo-avatar-teal"    text="MM">
+                  <HBox.margin><Insets left="-8.0"/></HBox.margin>
+               </Label>
+            </HBox>
+
+            <Label text="+ 2 400 professionnels connectés"
+                   style="-fx-font-family:'Nunito';-fx-font-size:11px;-fx-text-fill:rgba(255,255,255,0.50);"/>
+         </VBox>
+
+      </children>
+   </VBox>
+
+   <!-- ═══════════════════════════════════════════════════════
+        PANNEAU DROIT — Formulaire
+        ═══════════════════════════════════════════════════════ -->
+   <VBox alignment="CENTER" HBox.hgrow="ALWAYS"
+         style="-fx-background-color:#F0F3F5;">
+      <padding><Insets top="32" right="32" bottom="32" left="32"/></padding>
+      <children>
+
+         <!-- Carte blanche -->
+         <VBox prefWidth="320.0" maxWidth="320.0" spacing="20"
+               style="-fx-background-color:white;-fx-background-radius:20px;-fx-border-radius:20px;-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.08),24,0.0,0,6);-fx-padding:32px;">
+            <children>
+
+               <!-- En-tête : logo + titre + sous-titre -->
+               <VBox spacing="6">
+                  <Label styleClass="pelo-avatar, pelo-avatar-sm, pelo-avatar-green" text="P"/>
+                  <Label fx:id="cardTitle"    styleClass="pelo-title-xl" text="Connexion"/>
+                  <Label fx:id="cardSubtitle" styleClass="pelo-body"
+                         text="Bienvenue ! Entrez vos identifiants."
+                         wrapText="true" maxWidth="280"/>
+               </VBox>
+
+               <!-- Champs de formulaire (visibilité gérée par le controller) -->
+               <VBox spacing="10">
+                  <TextField     fx:id="fullNameField"  promptText="Nom complet"
+                                 styleClass="pelo-auth-input"
+                                 visible="false" managed="false"/>
+                  <TextField     fx:id="usernameField"  promptText="Nom d'utilisateur"
+                                 styleClass="pelo-auth-input"/>
+                  <PasswordField fx:id="passwordField"  promptText="Mot de passe"
+                                 styleClass="pelo-auth-input"/>
+                  <PasswordField fx:id="confirmField"   promptText="Confirmer le mot de passe"
+                                 styleClass="pelo-auth-input"
+                                 visible="false" managed="false"/>
+                  <Label         fx:id="errorLabel"     styleClass="pelo-auth-error"
+                                 wrapText="true" visible="false" managed="false"/>
+                  <Button        fx:id="submitButton"   styleClass="pelo-auth-btn"
+                                 text="Se connecter" maxWidth="Infinity"
+                                 onAction="#onSubmit"/>
+               </VBox>
+
+               <!-- Lien basculement connexion / inscription -->
+               <HBox alignment="CENTER" spacing="5">
+                  <Label fx:id="switchPromptLabel" styleClass="pelo-body"
+                         text="Pas encore de compte ?"/>
+                  <Label fx:id="switchLinkLabel"   styleClass="pelo-auth-link"
+                         text="S'inscrire"
+                         onMouseClicked="#onToggleMode"/>
+               </HBox>
+
+            </children>
+         </VBox>
+
+      </children>
+   </VBox>
+
+</HBox>
