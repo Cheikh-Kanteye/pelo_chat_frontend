@@ -1,23 +1,367 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Text?>
 
-<VBox spacing="10" style="-fx-padding: 10;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pelo_chat.controller.ChatController">
+<HBox prefHeight="720.0" prefWidth="1280.0" stylesheets="@pelo-theme.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pelo_chat.controller.ChatController">
+   <children>
+      <!-- SECTION 1: SIDEBAR NAVIGATION -->
+      <VBox alignment="TOP_CENTER" spacing="20.0" styleClass="pelo-sidebar">
+         <children>
+            <Button mnemonicParsing="false" styleClass="pelo-sidebar-item, active">
+               <graphic>
+                  <StackPane>
+                     <Text fill="#00853f" scaleX="1.5" scaleY="1.5" strokeType="OUTSIDE" strokeWidth="0.0" text="💬" />
+                     <Label styleClass="pelo-badge, pelo-badge-gold" text="3" StackPane.alignment="TOP_RIGHT">
+                        <StackPane.margin>
+                           <Insets right="-5.0" top="-5.0" />
+                        </StackPane.margin>
+                     </Label>
+                  </StackPane>
+               </graphic>
+            </Button>
+            <Button mnemonicParsing="false" styleClass="pelo-sidebar-item">
+               <graphic>
+                  <Text fill="WHITE" scaleX="1.5" scaleY="1.5" strokeType="OUTSIDE" strokeWidth="0.0" text="👥" />
+               </graphic>
+            </Button>
+            <Button mnemonicParsing="false" styleClass="pelo-sidebar-item">
+               <graphic>
+                  <Text fill="WHITE" scaleX="1.5" scaleY="1.5" strokeType="OUTSIDE" strokeWidth="0.0" text="#" />
+               </graphic>
+            </Button>
+            <Button mnemonicParsing="false" styleClass="pelo-sidebar-item">
+               <graphic>
+                  <Text fill="WHITE" scaleX="1.5" scaleY="1.5" strokeType="OUTSIDE" strokeWidth="0.0" text="📞" />
+               </graphic>
+            </Button>
+            <Button mnemonicParsing="false" styleClass="pelo-sidebar-item">
+               <graphic>
+                  <Text fill="WHITE" scaleX="1.5" scaleY="1.5" strokeType="OUTSIDE" strokeWidth="0.0" text="📄" />
+               </graphic>
+            </Button>
+            <Pane VBox.vgrow="ALWAYS" />
+            <Button mnemonicParsing="false" styleClass="pelo-sidebar-item">
+               <graphic>
+                  <Text fill="WHITE" scaleX="1.2" scaleY="1.2" strokeType="OUTSIDE" strokeWidth="0.0" text="⚙️" />
+               </graphic>
+            </Button>
+            <StackPane styleClass="pelo-avatar, pelo-avatar-sm, pelo-avatar-green">
+               <children>
+                  <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="DK" />
+               </children>
+            </StackPane>
+         </children>
+      </VBox>
 
-    <Label fx:id="statusLabel" text="..." />
+      <!-- SECTION 2: CHAT LIST PANEL -->
+      <VBox styleClass="pelo-chat-list">
+         <children>
+            <VBox spacing="15.0" styleClass="pelo-chat-list-header">
+               <children>
+                  <Label styleClass="pelo-title-lg" text="Messages" />
+                  <TextField fx:id="searchField" promptText="Search conversations..." styleClass="pelo-search-bar" />
+                  <HBox spacing="10.0">
+                     <children>
+                        <Button mnemonicParsing="false" styleClass="pelo-filter, active" text="All" />
+                        <Button mnemonicParsing="false" styleClass="pelo-filter" text="Direct" />
+                        <Button mnemonicParsing="false" styleClass="pelo-filter" text="Groups" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            <ScrollPane fitToWidth="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
+               <content>
+                  <VBox fx:id="chatListContainer">
+                     <children>
+                        <Label styleClass="pelo-section-label" text="PINNED" />
+                        <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="pelo-chat-item, active">
+                           <children>
+                              <StackPane styleClass="pelo-avatar, pelo-avatar-md, pelo-avatar-navy">
+                                 <children>
+                                    <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="AB" />
+                                    <Circle fill="#2ecc71" radius="5.0" stroke="WHITE" strokeType="INSIDE" StackPane.alignment="BOTTOM_RIGHT" />
+                                 </children>
+                              </StackPane>
+                              <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <HBox alignment="CENTER_LEFT">
+                                       <children>
+                                          <Label styleClass="pelo-title-sm" text="Amadou Ba" />
+                                          <Pane HBox.hgrow="ALWAYS" />
+                                          <Label styleClass="pelo-meta" text="09:41" />
+                                       </children>
+                                    </HBox>
+                                    <Label maxWidth="180.0" styleClass="pelo-body" text="👍 Parfait, merci pour le rapport..." />
+                                 </children>
+                              </VBox>
+                              <Label styleClass="pelo-badge" text="4" />
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="pelo-chat-item">
+                           <children>
+                              <StackPane styleClass="pelo-avatar, pelo-avatar-md, pelo-avatar-teal">
+                                 <children>
+                                    <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="NF" />
+                                    <Circle fill="#2ecc71" radius="5.0" stroke="WHITE" strokeType="INSIDE" StackPane.alignment="BOTTOM_RIGHT" />
+                                 </children>
+                              </StackPane>
+                              <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <HBox alignment="CENTER_LEFT">
+                                       <children>
+                                          <Label styleClass="pelo-title-sm" text="Ndèye Fatou Diop" />
+                                          <Pane HBox.hgrow="ALWAYS" />
+                                          <Label styleClass="pelo-meta" text="08:55" />
+                                       </children>
+                                    </HBox>
+                                    <Label maxWidth="180.0" styleClass="pelo-body" text="La présentation est prête ✓" />
+                                 </children>
+                              </VBox>
+                              <Label styleClass="pelo-badge" text="2" />
+                           </children>
+                        </HBox>
+                        
+                        <Label styleClass="pelo-section-label" text="GROUPS" />
+                        <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="pelo-chat-item">
+                           <children>
+                              <StackPane styleClass="pelo-avatar, pelo-avatar-md, pelo-avatar-green, pelo-avatar-group">
+                                 <children>
+                                    <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="ES" />
+                                 </children>
+                              </StackPane>
+                              <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <HBox alignment="CENTER_LEFT">
+                                       <children>
+                                          <Label styleClass="pelo-title-sm" text="Équipe Stratégie" />
+                                          <Pane HBox.hgrow="ALWAYS" />
+                                          <Label styleClass="pelo-meta" text="10:02" />
+                                       </children>
+                                    </HBox>
+                                    <Label maxWidth="180.0" styleClass="pelo-body" text="Ousmane: Réunion à 14h confirmée" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </content>
+            </ScrollPane>
+         </children>
+      </VBox>
 
-    <ListView fx:id="messageList" VBox.vgrow="ALWAYS" />
+      <!-- SECTION 3: MAIN CHAT PANEL -->
+      <VBox HBox.hgrow="ALWAYS">
+         <children>
+            <!-- Chat Header -->
+            <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="pelo-chat-header">
+               <children>
+                  <StackPane styleClass="pelo-avatar, pelo-avatar-md, pelo-avatar-navy">
+                     <children>
+                        <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="AB" />
+                        <Circle fill="#2ecc71" radius="5.0" stroke="WHITE" strokeType="INSIDE" StackPane.alignment="BOTTOM_RIGHT" />
+                     </children>
+                  </StackPane>
+                  <VBox alignment="CENTER_LEFT">
+                     <children>
+                        <Label styleClass="pelo-title-md" text="Amadou Ba" />
+                        <HBox alignment="CENTER_LEFT" spacing="5.0">
+                           <children>
+                              <Circle fill="#2ecc71" radius="3.0" />
+                              <Label styleClass="pelo-label-green" text="Online" />
+                              <Label styleClass="pelo-meta" text="• Directeur Financier" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+                  <Pane HBox.hgrow="ALWAYS" />
+                  <HBox alignment="CENTER" spacing="5.0">
+                     <children>
+                        <Button mnemonicParsing="false" styleClass="pelo-btn-icon">
+                           <graphic><Text strokeType="OUTSIDE" strokeWidth="0.0" text="📹" /></graphic>
+                        </Button>
+                        <Button mnemonicParsing="false" styleClass="pelo-btn-icon">
+                           <graphic><Text strokeType="OUTSIDE" strokeWidth="0.0" text="📞" /></graphic>
+                        </Button>
+                        <Button mnemonicParsing="false" styleClass="pelo-btn-icon">
+                           <graphic><Text strokeType="OUTSIDE" strokeWidth="0.0" text="ⓘ" /></graphic>
+                        </Button>
+                        <Button mnemonicParsing="false" styleClass="pelo-btn-icon">
+                           <graphic><Text strokeType="OUTSIDE" strokeWidth="0.0" text="🔍" /></graphic>
+                        </Button>
+                        <Button mnemonicParsing="false" styleClass="pelo-btn-icon">
+                           <graphic><Text strokeType="OUTSIDE" strokeWidth="0.0" text="•••" /></graphic>
+                        </Button>
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
 
-    <HBox spacing="8">
-        <TextField fx:id="recipientField" prefWidth="150" promptText="Destinataire" />
-        <TextField fx:id="messageField" promptText="Message..." HBox.hgrow="ALWAYS" />
-        <Button text="Envoyer" />
-    </HBox>
+            <!-- Message Area -->
+            <ScrollPane fitToWidth="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
+               <content>
+                  <VBox fx:id="messageContainer" spacing="25.0" style="-fx-padding: 30 40;">
+                     <children>
+                        <HBox alignment="CENTER">
+                           <children>
+                              <Label styleClass="pelo-date-divider" text="Today, February 17" />
+                           </children>
+                        </HBox>
+                        
+                        <!-- Received Message -->
+                        <HBox spacing="12.0">
+                           <children>
+                              <StackPane alignment="TOP_CENTER">
+                                 <children>
+                                    <StackPane styleClass="pelo-avatar, pelo-avatar-sm, pelo-avatar-navy">
+                                       <children>
+                                          <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="AB" />
+                                       </children>
+                                    </StackPane>
+                                 </children>
+                              </StackPane>
+                              <VBox spacing="5.0">
+                                 <children>
+                                    <Label styleClass="pelo-meta" text="Amadou Ba" />
+                                    <VBox styleClass="pelo-bubble, pelo-bubble-received">
+                                       <children>
+                                          <Label styleClass="pelo-body-navy" text="Bonjour Daouda ! Tu as eu le temps de réviser le rapport trimestriel que j'ai envoyé hier soir ?" />
+                                       </children>
+                                    </VBox>
+                                    <Label styleClass="pelo-meta" text="09:14" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
 
-    <Button text="Déconnexion" />
-</VBox>
+                        <!-- Sent Message -->
+                        <HBox alignment="TOP_RIGHT">
+                           <children>
+                              <VBox alignment="TOP_RIGHT" spacing="5.0">
+                                 <children>
+                                    <VBox styleClass="pelo-bubble, pelo-bubble-sent">
+                                       <children>
+                                          <Label style="-fx-text-fill: white;" styleClass="pelo-body" text="Bonjour Amadou ! Oui, je l'ai parcouru ce matin. Les chiffres du Q3 sont excellents." />
+                                       </children>
+                                    </VBox>
+                                    <HBox alignment="CENTER_RIGHT" spacing="5.0">
+                                       <children>
+                                          <Label styleClass="pelo-meta" text="09:22" />
+                                          <Text fill="#2ecc71" strokeType="OUTSIDE" strokeWidth="0.0" text="✓✓" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </content>
+            </ScrollPane>
+
+            <!-- Chat Input Area -->
+            <VBox styleClass="pelo-chat-input-area">
+               <children>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Button mnemonicParsing="false" styleClass="pelo-toolbar-btn" text="B" />
+                        <Button mnemonicParsing="false" styleClass="pelo-toolbar-btn" text="I" />
+                        <Button mnemonicParsing="false" styleClass="pelo-toolbar-btn" text="🔗" />
+                        <Button mnemonicParsing="false" styleClass="pelo-toolbar-btn" text="≡" />
+                        <Button mnemonicParsing="false" styleClass="pelo-toolbar-btn" text="\@" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" spacing="12.0">
+                     <children>
+                        <TextField fx:id="messageField" promptText="Je vais regarder ça maintenant — excellente initiative 👋" styleClass="pelo-text-input" HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" styleClass="pelo-btn-icon">
+                           <graphic><Text scaleX="1.3" scaleY="1.3" strokeType="OUTSIDE" strokeWidth="0.0" text="😊" /></graphic>
+                        </Button>
+                        <Button mnemonicParsing="false" styleClass="pelo-btn-icon">
+                           <graphic><Text scaleX="1.3" scaleY="1.3" strokeType="OUTSIDE" strokeWidth="0.0" text="📎" /></graphic>
+                        </Button>
+                        <Button mnemonicParsing="false" styleClass="pelo-send-btn">
+                           <graphic><Text fill="WHITE" scaleX="1.2" scaleY="1.2" strokeType="OUTSIDE" strokeWidth="0.0" text="➤" /></graphic>
+                        </Button>
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+         </children>
+      </VBox>
+
+      <!-- SECTION 4: CONTACT DETAILS PANEL -->
+      <VBox alignment="TOP_CENTER" spacing="25.0" styleClass="pelo-right-panel">
+         <children>
+            <VBox alignment="CENTER" spacing="15.0" styleClass="pelo-rp-header">
+               <children>
+                  <Label styleClass="pelo-title-sm" text="Contact Details" />
+               </children>
+            </VBox>
+            <VBox alignment="CENTER" spacing="10.0">
+               <children>
+                  <StackPane styleClass="pelo-avatar, pelo-avatar-lg, pelo-avatar-navy">
+                     <children>
+                        <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="AB" />
+                        <Circle fill="#2ecc71" radius="8.0" stroke="WHITE" strokeType="INSIDE" StackPane.alignment="BOTTOM_RIGHT" />
+                     </children>
+                  </StackPane>
+                  <Label styleClass="pelo-title-md" text="Amadou Ba" />
+                  <Label styleClass="pelo-meta" text="Directeur Financier • CFO" />
+                  <Label styleClass="pelo-dept-tag" text="Finance &amp; Stratégie" />
+               </children>
+            </VBox>
+            <HBox alignment="CENTER" spacing="10.0">
+               <children>
+                  <Button mnemonicParsing="false" styleClass="pelo-btn-primary" text="📹 Video" />
+                  <Button mnemonicParsing="false" styleClass="pelo-btn-ghost" text="📞 Call" />
+               </children>
+            </HBox>
+            <VBox spacing="12.0" style="-fx-padding: 0 20;">
+               <children>
+                  <Label styleClass="pelo-section-label" text="PROFILE" />
+                  <HBox alignment="CENTER_LEFT">
+                     <children>
+                        <Label styleClass="pelo-body" text="Status" />
+                        <Pane HBox.hgrow="ALWAYS" />
+                        <Label styleClass="pelo-label-green" text="• Online" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT">
+                     <children>
+                        <Label styleClass="pelo-body" text="Location" />
+                        <Pane HBox.hgrow="ALWAYS" />
+                        <Label styleClass="pelo-body-navy" text="Dakar, SN" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT">
+                     <children>
+                        <Label styleClass="pelo-body" text="Local time" />
+                        <Pane HBox.hgrow="ALWAYS" />
+                        <Label styleClass="pelo-body-navy" text="09:41 GMT" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT">
+                     <children>
+                        <Label styleClass="pelo-body" text="Member since" />
+                        <Pane HBox.hgrow="ALWAYS" />
+                        <Label styleClass="pelo-body-navy" text="Jan 2023" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+         </children>
+      </VBox>
+   </children>
+</HBox>
