@@ -331,8 +331,25 @@ public class ChatController {
                     false));
         }
         renderContactList();
-        if (!contacts.isEmpty()) {
-            selectConversation(contacts.get(0), itemByPeer.get(contacts.get(0).username()));
+
+        // Restaurer les previews des messages déjà reçus (ex. messages hors-ligne)
+        for (Contact c : contacts) {
+            List<ChatMessage> msgs = history.get(c.username());
+            if (msgs != null && !msgs.isEmpty()) {
+                ChatMessage last = msgs.get(msgs.size() - 1);
+                HBox item = itemByPeer.get(c.username());
+                if (item != null) updatePreview(item, last.content(), last.time());
+            }
+        }
+
+        // Sélectionner en priorité le contact qui a des messages en attente
+        Contact firstWithMessages = contacts.stream()
+                .filter(c -> history.containsKey(c.username()) && !history.get(c.username()).isEmpty())
+                .findFirst()
+                .orElse(contacts.isEmpty() ? null : contacts.get(0));
+
+        if (firstWithMessages != null) {
+            selectConversation(firstWithMessages, itemByPeer.get(firstWithMessages.username()));
         }
     }
 

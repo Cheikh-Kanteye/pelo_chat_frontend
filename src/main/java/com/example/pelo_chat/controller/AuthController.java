@@ -141,7 +141,7 @@ public class AuthController {
                     showError(packet.getContent());
                 }
             });
-            socketService.register(username, passwordField.getText());
+            socketService.register(username, fullNameField.getText().trim(), passwordField.getText());
         } catch (Exception e) {
             showError("Impossible de joindre le serveur");
         }
@@ -151,6 +151,7 @@ public class AuthController {
         try {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/com/example/pelo_chat/chat.fxml"));
+            loader.setClassLoader(getClass().getClassLoader());
             Parent root = loader.load();
 
             ChatController ctrl = loader.getController();
@@ -160,7 +161,9 @@ public class AuthController {
             stage.setScene(new Scene(root, 960, 680));
             stage.setTitle("PELO — " + username);
         } catch (Exception e) {
-            showError("Erreur lors du chargement de l'interface : " + e.getMessage());
+            Throwable cause = (e.getCause() != null) ? e.getCause() : e;
+            cause.printStackTrace();
+            showError(cause.getClass().getSimpleName() + " : " + cause.getMessage());
         }
     }
 

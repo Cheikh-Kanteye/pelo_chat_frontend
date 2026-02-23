@@ -57,8 +57,8 @@ public class SocketService {
         send(new Packet("LOGIN", username, null, password));
     }
 
-    public void register(String username, String password) {
-        send(new Packet("REGISTER", username, null, password));
+    public void register(String username, String fullName, String password) {
+        send(new Packet("REGISTER", username, fullName, password));
     }
 
     /** Demande au serveur la liste de tous les utilisateurs (hors soi-même). */
