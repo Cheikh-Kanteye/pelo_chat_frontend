@@ -157,7 +157,7 @@
                   <HBox alignment="CENTER_LEFT" spacing="12.0">
                      <children>
                         <TextField fx:id="messageField" promptText="Je vais regarder ça maintenant — excellente initiative 👋" styleClass="pelo-text-input" HBox.hgrow="ALWAYS" />
-                        <Button mnemonicParsing="false" styleClass="pelo-btn-icon">
+                        <Button fx:id="emojiButton" mnemonicParsing="false" onAction="#onEmojiPicker" styleClass="pelo-btn-icon">
                            <graphic><Text scaleX="1.3" scaleY="1.3" strokeType="OUTSIDE" strokeWidth="0.0" text="😊" /></graphic>
                         </Button>
                         <Button mnemonicParsing="false" styleClass="pelo-btn-icon">

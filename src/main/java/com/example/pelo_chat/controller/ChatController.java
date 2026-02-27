@@ -4,12 +4,17 @@ import com.example.pelo_chat.model.User;
 import com.example.pelo_chat.service.SocketService;
 import com.example.pelo_chat.utils.Packet;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -18,7 +23,13 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
+import javafx.stage.Popup;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -33,6 +44,7 @@ public class ChatController {
     @FXML private VBox      messageContainer;
     @FXML private TextField messageField;
     @FXML private TextField searchField;
+    @FXML private Button    emojiButton;
 
     @FXML private Label     headerName;
     @FXML private Label     headerStatus;
@@ -45,13 +57,38 @@ public class ChatController {
     // ── État ─────────────────────────────────────────────
     private String        currentUser;
     private SocketService socketService;
+    private Popup         emojiPickerPopup;
+    private Path          historyDir;
 
     private Contact       currentContact;
     private HBox          activeItem;
 
-    private final List<Contact>                  contacts   = new ArrayList<>();
-    private final Map<String, List<ChatMessage>> history    = new HashMap<>();
-    private final Map<String, HBox>              itemByPeer = new HashMap<>();
+    private final List<Contact>                  contacts        = new ArrayList<>();
+    private final Map<String, List<ChatMessage>> history         = new HashMap<>();
+    private final Map<String, HBox>              itemByPeer      = new HashMap<>();
+    private final Map<String, Circle>            statusDotByPeer = new HashMap<>();
+
+    // ── Emojis ───────────────────────────────────────────
+    private static final String[] EMOJIS = {
+        "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇",
+        "🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚",
+        "😋","😛","😜","🤪","😝","🤑","🤗","🤭","🤔","🤐",
+        "😐","😑","😶","😏","😒","🙄","😬","😔","😪","😴",
+        "😷","🤒","🤕","🤢","🤮","🤧","🥵","🥶","😵","🤯",
+        "🥳","😎","🤓","🧐","😕","😟","🙁","☹","😮","😯",
+        "😲","😳","🥺","😦","😧","😨","😰","😥","😢","😭",
+        "😱","😖","😣","😞","😓","😩","😫","🥱","😤","😡",
+        "😠","🤬","😈","👿","💀","💩","🤡","👻","👽","🤖",
+        "👋","🤚","✋","🖖","👌","✌","🤞","🤟","🤘","🤙",
+        "👈","👉","👆","👇","☝","👍","👎","✊","👊","👏",
+        "🙌","🤝","🙏","💪","❤","🧡","💛","💚","💙","💜",
+        "🖤","💔","💕","💞","💓","💗","💖","💘","💝","✨",
+        "🌟","⭐","🌈","☀","🌙","⚡","❄","🔥","💧","🌊",
+        "🎉","🎊","🎈","🎁","🏆","🥇","🎯","🎮","🎵","🎶",
+        "🍎","🍊","🍋","🍇","🍓","🍕","🍔","🍟","🍦","☕",
+        "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯",
+        "🦁","🐮","🐷","🐸","🐵","🙈","🙉","🙊","🐔","🐧"
+    };
 
     // ── Constantes ───────────────────────────────────────
     private static final String[] AVATAR_STYLES = {
@@ -72,8 +109,11 @@ public class ChatController {
             String initials,
             String avatarStyle,
             String role,
-            boolean group
-    ) {}
+            boolean group,
+            String status
+    ) {
+        boolean isOnline() { return "ONLINE".equalsIgnoreCase(status); }
+    }
 
     private record ChatMessage(
             String from,
@@ -90,9 +130,13 @@ public class ChatController {
         this.currentUser   = username;
         this.socketService = service;
 
+        // Préparer le dossier de persistance et charger l'historique local
+        historyDir = Paths.get(System.getProperty("user.home"), ".pelo_chat", username, "messages");
+        try { Files.createDirectories(historyDir); } catch (IOException ignored) {}
+        loadLocalHistory();
+
         socketService.setOnPacketReceived(this::handlePacket);
 
-        // Afficher un état de chargement, puis demander la liste au serveur
         showLoadingState();
         socketService.requestUsers(currentUser);
     }
@@ -106,12 +150,53 @@ public class ChatController {
     }
 
     // ═══════════════════════════════════════════════════════
+    // PERSISTANCE LOCALE DE L'HISTORIQUE
+    // ═══════════════════════════════════════════════════════
+
+    /** Charge toutes les conversations sauvegardées depuis ~/.pelo_chat/{user}/messages/. */
+    private void loadLocalHistory() {
+        if (historyDir == null || !Files.exists(historyDir)) return;
+        Type listType = new TypeToken<List<ChatMessage>>() {}.getType();
+        try (var stream = Files.list(historyDir)) {
+            stream.filter(p -> p.toString().endsWith(".json"))
+                  .forEach(p -> {
+                      String peer = p.getFileName().toString().replace(".json", "");
+                      try {
+                          String json = Files.readString(p);
+                          List<ChatMessage> msgs = new Gson().fromJson(json, listType);
+                          if (msgs != null && !msgs.isEmpty()) {
+                              history.put(peer, new ArrayList<>(msgs));
+                          }
+                      } catch (IOException e) {
+                          System.err.println("Lecture historique échouée pour " + peer + " : " + e.getMessage());
+                      }
+                  });
+        } catch (IOException e) {
+            System.err.println("Impossible de lister le dossier historique : " + e.getMessage());
+        }
+    }
+
+    /** Sauvegarde la conversation avec un pair dans un fichier JSON. */
+    private void saveConversation(String peer) {
+        if (historyDir == null) return;
+        List<ChatMessage> msgs = history.get(peer);
+        if (msgs == null || msgs.isEmpty()) return;
+        Path file = historyDir.resolve(peer + ".json");
+        try {
+            Files.writeString(file, new Gson().toJson(msgs));
+        } catch (IOException e) {
+            System.err.println("Sauvegarde échouée pour " + peer + " : " + e.getMessage());
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
     // LISTE DES CONVERSATIONS
     // ═══════════════════════════════════════════════════════
 
     private void renderContactList() {
         chatListContainer.getChildren().clear();
         itemByPeer.clear();
+        statusDotByPeer.clear();
 
         for (Contact c : contacts) {
             List<ChatMessage> msgs    = history.getOrDefault(c.username(), List.of());
@@ -125,7 +210,17 @@ public class ChatController {
     }
 
     private HBox buildChatItem(Contact c, String preview, String time) {
-        StackPane avatar = makeAvatar(c.initials(), "pelo-avatar-md", c.avatarStyle(), !c.group());
+        StackPane avatar = makeAvatar(c.initials(), "pelo-avatar-md", c.avatarStyle(), false);
+
+        if (!c.group()) {
+            Circle dot = new Circle(5);
+            dot.setFill(c.isOnline() ? Color.web("#2ecc71") : Color.web("#95a5a6"));
+            dot.setStroke(Color.WHITE);
+            dot.setStrokeWidth(1.5);
+            StackPane.setAlignment(dot, Pos.BOTTOM_RIGHT);
+            avatar.getChildren().add(dot);
+            statusDotByPeer.put(c.username(), dot);
+        }
 
         Label nameLabel = new Label(c.displayName());
         nameLabel.getStyleClass().add("pelo-title-sm");
@@ -167,8 +262,8 @@ public class ChatController {
 
         // Header
         headerName.setText(contact.displayName());
-        headerRole.setText("• " + contact.role());
-        headerStatus.setText("Online");
+        headerRole.setText(contact.role().isEmpty() ? "" : "• " + contact.role());
+        updateHeaderStatus(contact);
 
         // Panneau de détails
         rpInitials.setText(contact.initials());
@@ -294,12 +389,12 @@ public class ChatController {
                 String from    = packet.getFrom();
                 String content = packet.getContent();
 
-                // Ajouter l'expéditeur si inconnu
+                // Ajouter l'expéditeur si inconnu (forcément en ligne s'il envoie un msg)
                 if (contacts.stream().noneMatch(c -> c.username().equals(from))) {
                     contacts.add(new Contact(
                             from, from, initials(from),
                             AVATAR_STYLES[contacts.size() % AVATAR_STYLES.length],
-                            "", false));
+                            "", false, "ONLINE"));
                     renderContactList();
                     restoreActiveStyle();
                 }
@@ -312,6 +407,9 @@ public class ChatController {
                 }
             });
 
+            case "USER_STATUS_CHANGED" -> Platform.runLater(() ->
+                    updateContactStatus(packet.getFrom(), packet.getContent()));
+
             case "ERROR" -> Platform.runLater(() ->
                     System.err.println("Erreur serveur : " + packet.getContent()));
         }
@@ -322,13 +420,17 @@ public class ChatController {
         contacts.clear();
         for (int i = 0; i < users.length; i++) {
             User u = users[i];
+            String displayName = (u.getFullName() != null && !u.getFullName().isBlank())
+                    ? u.getFullName() : u.getUsername();
+            String status = u.getStatus() != null ? u.getStatus() : "OFFLINE";
             contacts.add(new Contact(
                     u.getUsername(),
-                    u.getUsername(),
-                    initials(u.getUsername()),
+                    displayName,
+                    initials(displayName),
                     AVATAR_STYLES[i % AVATAR_STYLES.length],
-                    u.getStatus() != null ? u.getStatus() : "OFFLINE",
-                    false));
+                    "",      // le serveur n'envoie pas de rôle pour l'instant
+                    false,
+                    status));
         }
         renderContactList();
 
@@ -353,12 +455,155 @@ public class ChatController {
         }
     }
 
+    /**
+     * Met à jour le statut d'un contact en temps réel sans reconstruire toute la liste.
+     * Appelée sur réception d'un paquet USER_STATUS_CHANGED.
+     */
+    private void updateContactStatus(String username, String newStatus) {
+        contacts.replaceAll(c -> c.username().equals(username)
+                ? new Contact(c.username(), c.displayName(), c.initials(),
+                              c.avatarStyle(), c.role(), c.group(), newStatus)
+                : c);
+
+        // Mettre à jour le point coloré dans la liste
+        Circle dot = statusDotByPeer.get(username);
+        if (dot != null) {
+            boolean online = "ONLINE".equalsIgnoreCase(newStatus);
+            dot.setFill(online ? Color.web("#2ecc71") : Color.web("#95a5a6"));
+        }
+
+        // Mettre à jour le header si ce contact est sélectionné
+        if (currentContact != null && currentContact.username().equals(username)) {
+            currentContact = contacts.stream()
+                    .filter(c -> c.username().equals(username))
+                    .findFirst().orElse(currentContact);
+            updateHeaderStatus(currentContact);
+        }
+    }
+
+    /** Affiche le bon libellé et la bonne couleur de statut dans le header. */
+    private void updateHeaderStatus(Contact contact) {
+        if (contact.isOnline()) {
+            headerStatus.setText("En ligne");
+            headerStatus.getStyleClass().removeAll("pelo-meta");
+            if (!headerStatus.getStyleClass().contains("pelo-label-green"))
+                headerStatus.getStyleClass().add("pelo-label-green");
+        } else {
+            headerStatus.setText("Hors ligne");
+            headerStatus.getStyleClass().removeAll("pelo-label-green");
+            if (!headerStatus.getStyleClass().contains("pelo-meta"))
+                headerStatus.getStyleClass().add("pelo-meta");
+        }
+    }
+
     /** Réapplique la classe "active" sur l'item du contact courant après un rechargement. */
     private void restoreActiveStyle() {
         if (currentContact != null) {
             activeItem = itemByPeer.get(currentContact.username());
             if (activeItem != null) activeItem.getStyleClass().add("active");
         }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // SÉLECTEUR D'EMOJIS
+    // ═══════════════════════════════════════════════════════
+
+    @FXML
+    private void onEmojiPicker() {
+        messageField.requestFocus();
+        // Tente le picker natif de l'OS (Ctrl+. sur GNOME / KDE)
+        // Si Robot échoue (headless, env. non supporté…) → picker custom
+        Platform.runLater(() -> {
+            if (!tryNativeEmojiPicker()) {
+                showCustomEmojiPicker();
+            }
+        });
+    }
+
+    /** Simule Ctrl+. pour ouvrir le picker émoji natif du bureau. */
+    private boolean tryNativeEmojiPicker() {
+        try {
+            java.awt.Robot robot = new java.awt.Robot();
+            robot.keyPress(java.awt.event.KeyEvent.VK_CONTROL);
+            robot.keyPress(java.awt.event.KeyEvent.VK_PERIOD);
+            robot.keyRelease(java.awt.event.KeyEvent.VK_PERIOD);
+            robot.keyRelease(java.awt.event.KeyEvent.VK_CONTROL);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /** Affiche / cache le picker émoji intégré à l'application. */
+    private void showCustomEmojiPicker() {
+        if (emojiPickerPopup == null) {
+            emojiPickerPopup = buildEmojiPopup();
+        }
+        if (emojiPickerPopup.isShowing()) {
+            emojiPickerPopup.hide();
+        } else {
+            Bounds bounds = emojiButton.localToScreen(emojiButton.getBoundsInLocal());
+            emojiPickerPopup.show(emojiButton, bounds.getMinX(), bounds.getMinY() - 330);
+        }
+    }
+
+    private Popup buildEmojiPopup() {
+        Popup popup = new Popup();
+        popup.setAutoHide(true);
+
+        FlowPane grid = new FlowPane();
+        grid.setPrefWrapLength(310);
+        grid.setHgap(2);
+        grid.setVgap(2);
+        grid.setStyle(
+            "-fx-background-color: #1e2a3a;" +
+            "-fx-padding: 10;" +
+            "-fx-background-radius: 10;"
+        );
+
+        for (String emoji : EMOJIS) {
+            Button btn = new Button(emoji);
+            btn.setStyle(
+                "-fx-background-color: transparent;" +
+                "-fx-font-size: 18px;" +
+                "-fx-cursor: hand;" +
+                "-fx-padding: 4;"
+            );
+            btn.setOnMouseEntered(e -> btn.setStyle(
+                "-fx-background-color: #2a3a4a;" +
+                "-fx-font-size: 18px;" +
+                "-fx-cursor: hand;" +
+                "-fx-padding: 4;" +
+                "-fx-background-radius: 6;"
+            ));
+            btn.setOnMouseExited(e -> btn.setStyle(
+                "-fx-background-color: transparent;" +
+                "-fx-font-size: 18px;" +
+                "-fx-cursor: hand;" +
+                "-fx-padding: 4;"
+            ));
+            btn.setOnAction(e -> {
+                int caret = messageField.getCaretPosition();
+                messageField.insertText(caret, emoji);
+                popup.hide();
+                messageField.requestFocus();
+            });
+            grid.getChildren().add(btn);
+        }
+
+        ScrollPane scroll = new ScrollPane(grid);
+        scroll.setPrefSize(330, 300);
+        scroll.setFitToWidth(true);
+        scroll.setStyle(
+            "-fx-background-color: #1e2a3a;" +
+            "-fx-background: #1e2a3a;" +
+            "-fx-border-color: #2a3a4a;" +
+            "-fx-border-radius: 10;" +
+            "-fx-background-radius: 10;"
+        );
+
+        popup.getContent().add(scroll);
+        return popup;
     }
 
     // ═══════════════════════════════════════════════════════
@@ -377,6 +622,7 @@ public class ChatController {
 
     private void recordMessage(String peer, ChatMessage msg) {
         history.computeIfAbsent(peer, k -> new ArrayList<>()).add(msg);
+        saveConversation(peer);
 
         HBox item = itemByPeer.get(peer);
         if (item != null) updatePreview(item, msg.content(), msg.time());

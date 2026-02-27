@@ -4,10 +4,11 @@ module com.example.pelo_chat {
     requires transitive javafx.graphics;
     requires static lombok;
     requires com.google.gson;
+    requires java.desktop;
 
 
     opens com.example.pelo_chat to javafx.fxml;
-    opens com.example.pelo_chat.controller to javafx.fxml;
+    opens com.example.pelo_chat.controller to javafx.fxml, com.google.gson;
     opens com.example.pelo_chat.utils to com.google.gson;
     opens com.example.pelo_chat.model to com.google.gson;
     opens com.example.pelo_chat.service to javafx.fxml;
