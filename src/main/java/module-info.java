@@ -6,7 +6,6 @@ module com.example.pelo_chat {
     requires com.google.gson;
     requires java.desktop;
 
-
     opens com.example.pelo_chat to javafx.fxml;
     opens com.example.pelo_chat.controller to javafx.fxml, com.google.gson;
     opens com.example.pelo_chat.utils to com.google.gson;
@@ -15,7 +14,7 @@ module com.example.pelo_chat {
 
     exports com.example.pelo_chat;
     exports com.example.pelo_chat.controller;
-    exports com.example.pelo_chat.service;    // ← AJOUTER
-    exports com.example.pelo_chat.utils;      // ← AJOUTER
-    exports com.example.pelo_chat.model;      // ← AJOUTER
+    exports com.example.pelo_chat.service;
+    exports com.example.pelo_chat.utils;
+    exports com.example.pelo_chat.model;
 }
