@@ -59,6 +59,7 @@
             <StackPane styleClass="pelo-avatar, pelo-avatar-sm, pelo-avatar-green">
                <children>
                   <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="DK" />
+                  <Circle fx:id="userStatusDot" fill="#2ecc71" radius="4.0" stroke="WHITE" strokeType="INSIDE" StackPane.alignment="BOTTOM_RIGHT" />
                </children>
             </StackPane>
          </children>
@@ -97,7 +98,7 @@
                   <StackPane styleClass="pelo-avatar, pelo-avatar-md, pelo-avatar-navy">
                      <children>
                         <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="AB" />
-                        <Circle fill="#2ecc71" radius="5.0" stroke="WHITE" strokeType="INSIDE" StackPane.alignment="BOTTOM_RIGHT" />
+                        <Circle fx:id="headerStatusDot" fill="#2ecc71" radius="5.0" stroke="WHITE" strokeType="INSIDE" StackPane.alignment="BOTTOM_RIGHT" />
                      </children>
                   </StackPane>
                   <VBox alignment="CENTER_LEFT">
@@ -105,7 +106,7 @@
                         <Label fx:id="headerName" styleClass="pelo-title-md" text="Amadou Ba" />
                         <HBox alignment="CENTER_LEFT" spacing="5.0">
                            <children>
-                              <Circle fill="#2ecc71" radius="3.0" />
+                              <Circle fx:id="headerStatusInfoDot" fill="#2ecc71" radius="3.0" />
                               <Label fx:id="headerStatus" styleClass="pelo-label-green" text="Online" />
                               <Label fx:id="headerRole" styleClass="pelo-meta" text="• Directeur Financier" />
                            </children>
@@ -186,7 +187,7 @@
                   <StackPane styleClass="pelo-avatar, pelo-avatar-lg, pelo-avatar-navy">
                      <children>
                         <Text fx:id="rpInitials" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="AB" />
-                        <Circle fill="#2ecc71" radius="8.0" stroke="WHITE" strokeType="INSIDE" StackPane.alignment="BOTTOM_RIGHT" />
+                        <Circle fx:id="rpStatusDot" fill="#2ecc71" radius="8.0" stroke="WHITE" strokeType="INSIDE" StackPane.alignment="BOTTOM_RIGHT" />
                      </children>
                   </StackPane>
                   <Label fx:id="rpName" styleClass="pelo-title-md" text="Amadou Ba" />
@@ -207,7 +208,7 @@
                      <children>
                         <Label styleClass="pelo-body" text="Status" />
                         <Pane HBox.hgrow="ALWAYS" />
-                        <Label styleClass="pelo-label-green" text="• Online" />
+                        <Label fx:id="rpStatusLabel" styleClass="pelo-label-green" text="• En ligne" />
                      </children>
                   </HBox>
                   <HBox alignment="CENTER_LEFT">
