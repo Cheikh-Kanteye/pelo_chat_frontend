@@ -424,7 +424,7 @@
 ───────────────────────────────────────────────────────── */
 
 .pelo-sidebar {
-    -fx-background-color: rgba(44, 62, 80, 0.92);
+    -fx-background-color: -pelo-navy-deep;
     -fx-pref-width: 72px;
     -fx-min-width: 72px;
     -fx-max-width: 72px;
@@ -455,6 +455,20 @@
     -fx-background-color: rgba(0, 133, 63, 0.22);
     -fx-border-color: rgba(0, 133, 63, 0.35);
     -fx-border-width: 1px;
+}
+
+/* Forcer la couleur des icônes dans la sidebar */
+.pelo-icon {
+    -fx-fill: rgba(255, 255, 255, 0.85);
+}
+
+.pelo-sidebar-item:hover .pelo-icon {
+    -fx-fill: white;
+}
+
+.pelo-sidebar-item.active .pelo-icon {
+    -fx-fill: #2ECC71;
+    /* Vert vibrant pour l'état actif */
 }
 
 /* ─────────────────────────────────────────────────────────

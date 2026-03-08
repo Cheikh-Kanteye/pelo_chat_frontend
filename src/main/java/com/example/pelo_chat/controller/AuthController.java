@@ -6,11 +6,15 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Properties;
 
 /**
  * PELO — Contrôleur de l'écran d'authentification (auth.fxml).
@@ -19,16 +23,32 @@ import javafx.stage.Stage;
 public class AuthController {
 
     // ── Champs injectés par FXML ───────────────────────────
-    @FXML private Label         cardTitle;
-    @FXML private Label         cardSubtitle;
-    @FXML private TextField     fullNameField;
-    @FXML private TextField     usernameField;
-    @FXML private PasswordField passwordField;
-    @FXML private PasswordField confirmField;
-    @FXML private Label         errorLabel;
-    @FXML private Button        submitButton;
-    @FXML private Label         switchPromptLabel;
-    @FXML private Label         switchLinkLabel;
+    @FXML
+    private Label cardTitle;
+    @FXML
+    private Label cardSubtitle;
+    @FXML
+    private TextField fullNameField;
+    @FXML
+    private TextField usernameField;
+    @FXML
+    private PasswordField passwordField;
+    @FXML
+    private PasswordField confirmField;
+    @FXML
+    private Label errorLabel;
+    @FXML
+    private Button submitButton;
+    @FXML
+    private Label switchPromptLabel;
+    @FXML
+    private Label switchLinkLabel;
+    @FXML
+    private CheckBox rememberMeCheck;
+    @FXML
+    private HBox rememberMeContainer;
+
+    private static final String SESSION_FILE = System.getProperty("user.home") + "/.pelo_session";
 
     private final SocketService socketService = new SocketService();
     private boolean isLoginMode = true;
@@ -41,6 +61,7 @@ public class AuthController {
     public void initialize() {
         switchLinkLabel.setCursor(Cursor.HAND);
         showLoginMode();
+        javafx.application.Platform.runLater(this::attemptAutoLogin);
     }
 
     // ═══════════════════════════════════════════════════════
@@ -49,14 +70,18 @@ public class AuthController {
 
     @FXML
     private void onSubmit() {
-        if (isLoginMode) handleLogin();
-        else             handleRegister();
+        if (isLoginMode)
+            handleLogin();
+        else
+            handleRegister();
     }
 
     @FXML
     private void onToggleMode() {
-        if (isLoginMode) showRegisterMode();
-        else             showLoginMode();
+        if (isLoginMode)
+            showRegisterMode();
+        else
+            showLoginMode();
     }
 
     // ═══════════════════════════════════════════════════════
@@ -72,7 +97,8 @@ public class AuthController {
         switchLinkLabel.setText("S'inscrire");
         submitButton.setText("Se connecter");
         setVisible(fullNameField, false);
-        setVisible(confirmField,  false);
+        setVisible(confirmField, false);
+        setVisible(rememberMeContainer, true);
         hideError();
     }
 
@@ -85,7 +111,8 @@ public class AuthController {
         switchLinkLabel.setText("Se connecter");
         submitButton.setText("Créer mon compte");
         setVisible(fullNameField, true);
-        setVisible(confirmField,  true);
+        setVisible(confirmField, true);
+        setVisible(rememberMeContainer, false);
         hideError();
     }
 
@@ -103,6 +130,9 @@ public class AuthController {
         try {
             socketService.connect(packet -> {
                 if ("ACK".equals(packet.getAction())) {
+                    if (rememberMeCheck.isSelected()) {
+                        saveSession(username, passwordField.getText());
+                    }
                     navigateToChat(username);
                 } else {
                     showError(packet.getContent());
@@ -167,6 +197,52 @@ public class AuthController {
         }
     }
 
+    // ── Session Management ────────────────────────────────
+
+    private void attemptAutoLogin() {
+        Properties props = loadSession();
+        if (props == null)
+            return;
+
+        String user = props.getProperty("username");
+        String pass = props.getProperty("password");
+
+        if (user != null && pass != null) {
+            usernameField.setText(user);
+            passwordField.setText(pass);
+            rememberMeCheck.setSelected(true);
+            handleLogin();
+        }
+    }
+
+    private void saveSession(String username, String password) {
+        try {
+            Properties props = new Properties();
+            props.setProperty("username", username);
+            props.setProperty("password", password);
+            try (OutputStream out = new FileOutputStream(SESSION_FILE)) {
+                props.store(out, "PELO Chat Session");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Properties loadSession() {
+        File file = new File(SESSION_FILE);
+        if (!file.exists())
+            return null;
+
+        try (InputStream in = new FileInputStream(file)) {
+            Properties props = new Properties();
+            props.load(in);
+            return props;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     // ═══════════════════════════════════════════════════════
     // UTILITAIRES UI
     // ═══════════════════════════════════════════════════════
@@ -187,7 +263,10 @@ public class AuthController {
         confirmField.clear();
     }
 
-    /** Affiche ou masque un nœud en gérant aussi managed pour ne pas réserver d'espace. */
+    /**
+     * Affiche ou masque un nœud en gérant aussi managed pour ne pas réserver
+     * d'espace.
+     */
     private static void setVisible(javafx.scene.Node node, boolean visible) {
         node.setVisible(visible);
         node.setManaged(visible);

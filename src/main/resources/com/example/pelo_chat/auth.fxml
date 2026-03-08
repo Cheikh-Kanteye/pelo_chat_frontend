@@ -107,6 +107,11 @@
                                  visible="false" managed="false"/>
                   <Label         fx:id="errorLabel"     styleClass="pelo-auth-error"
                                  wrapText="true" visible="false" managed="false"/>
+                  
+                  <HBox fx:id="rememberMeContainer" alignment="CENTER_LEFT" spacing="8">
+                     <javafx.scene.control.CheckBox fx:id="rememberMeCheck" text="Rester connecté" styleClass="pelo-body"/>
+                  </HBox>
+
                   <Button        fx:id="submitButton"   styleClass="pelo-auth-btn"
                                  text="Se connecter" maxWidth="Infinity"
                                  onAction="#onSubmit"/>

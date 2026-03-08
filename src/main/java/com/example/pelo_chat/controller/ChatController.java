@@ -14,11 +14,15 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 import javafx.stage.Popup;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -707,8 +711,24 @@ public class ChatController {
 
     @FXML
     private void onDisconnect() {
+        try {
+            java.nio.file.Files
+                    .deleteIfExists(java.nio.file.Paths.get(System.getProperty("user.home") + "/.pelo_session"));
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
         socketService.disconnect();
-        Platform.exit();
+
+        // Naviguer vers Auth
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pelo_chat/auth.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) messageField.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("PELO — Connexion");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // ═══════════════════════════════════════════════════════
@@ -716,7 +736,20 @@ public class ChatController {
     // ═══════════════════════════════════════════════════════
 
     private void recordMessage(String peer, ChatMessage msg) {
-        history.computeIfAbsent(peer, k -> new ArrayList<>()).add(msg);
+        List<ChatMessage> msgs = history.computeIfAbsent(peer, k -> new ArrayList<>());
+
+        // Dé-doublonnage : ne pas ajouter si le dernier message est identique
+        if (!msgs.isEmpty()) {
+            ChatMessage last = msgs.get(msgs.size() - 1);
+            if (last.from().equals(msg.from()) && last.content().equals(msg.content())) {
+                // On peut aussi comparer le timestamp si nécessaire, mais le contenu +
+                // expéditeur
+                // suffit pour les messages "re-livrés" par erreur.
+                return;
+            }
+        }
+
+        msgs.add(msg);
         saveConversation(peer);
 
         HBox item = itemByPeer.get(peer);
