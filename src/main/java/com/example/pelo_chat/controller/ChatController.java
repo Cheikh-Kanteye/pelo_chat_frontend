@@ -36,6 +36,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Contrôleur principal de l'interface de chat (chat.fxml).
+ *
+ * Responsabilités :
+ *  - Afficher la liste des contacts reçue du serveur (USERS_LIST)
+ *  - Gérer l'envoi et la réception de messages en temps réel
+ *  - Persister l'historique des conversations localement (JSON dans ~/.pelo_chat/)
+ *  - Mettre à jour le statut en ligne/hors ligne des contacts (STATUS_UPDATE)
+ *  - Fournir le sélecteur d'emojis (natif OS ou popup custom)
+ *
+ * Cycle de vie : init() est appelé par AuthController juste après le chargement du FXML,
+ * avec le username de l'utilisateur connecté et le SocketService déjà ouvert.
+ */
 public class ChatController {
 
     // ── FXML injections ───────────────────────────────────
@@ -76,14 +89,18 @@ public class ChatController {
     private Circle userStatusDot;
 
     // ── État ─────────────────────────────────────────────
-    private String currentUser;
-    private SocketService socketService;
-    private Popup emojiPickerPopup;
-    private Path historyDir;
+    private String currentUser;          // Username de l'utilisateur connecté
+    private SocketService socketService; // Connexion TCP partagée avec AuthController
+    private Popup emojiPickerPopup;      // Popup emoji (construit une fois, réutilisé)
+    private Path historyDir;             // ~/.pelo_chat/{user}/messages/
 
-    private Contact currentContact;
-    private HBox activeItem;
+    private Contact currentContact; // Contact dont la conversation est affichée
+    private HBox activeItem;        // Élément de liste actuellement surligné
 
+    // contacts     : liste ordonnée des contacts telle que renvoyée par le serveur
+    // history      : messages par peer (clé = username du peer)
+    // itemByPeer   : référence vers l'HBox de liste pour mettre à jour le preview
+    // statusDotByPeer : référence vers le Circle coloré pour changer online/offline
     private final List<Contact> contacts = new ArrayList<>();
     private final Map<String, List<ChatMessage>> history = new HashMap<>();
     private final Map<String, HBox> itemByPeer = new HashMap<>();
@@ -123,30 +140,49 @@ public class ChatController {
     // MODÈLES INTERNES
     // ═══════════════════════════════════════════════════════
 
+    /**
+     * Représentation locale d'un contact (construit à partir de User reçu du serveur).
+     * Immuable (record Java) : pour mettre à jour un champ (ex. status), on recrée un
+     * nouvel objet Contact via contacts.replaceAll(...).
+     */
     private record Contact(
-            String username,
-            String displayName,
-            String initials,
-            String avatarStyle,
-            String role,
-            boolean group,
-            String status) {
+            String username,    // Identifiant unique (sert de clé dans les maps)
+            String displayName, // Nom affiché (fullName si disponible, sinon username)
+            String initials,    // 1 ou 2 lettres pour l'avatar
+            String avatarStyle, // Classe CSS couleur de l'avatar (ex. "pelo-avatar-green")
+            String role,        // Rôle ou département (vide pour l'instant côté serveur)
+            boolean group,      // true si c'est un groupe (non utilisé pour l'instant)
+            String status) {    // "ONLINE" | "OFFLINE"
         boolean isOnline() {
             return "ONLINE".equalsIgnoreCase(status);
         }
     }
 
+    /**
+     * Un message dans l'historique d'une conversation.
+     * Sérialisé en JSON pour la persistance locale.
+     */
     private record ChatMessage(
-            String from,
-            String content,
-            boolean mine,
-            String time) {
+            String from,    // Expéditeur (username)
+            String content, // Texte du message
+            boolean mine,   // true si envoyé par l'utilisateur courant
+            String time) {  // Heure au format HH:mm
     }
 
     // ═══════════════════════════════════════════════════════
     // INITIALISATION
     // ═══════════════════════════════════════════════════════
 
+    /**
+     * Initialise le contrôleur après le chargement du FXML.
+     * Appelé par AuthController juste après la navigation.
+     *
+     * Ordre des opérations :
+     *  1. Prépare le dossier d'historique local
+     *  2. Charge les conversations précédentes depuis le disque
+     *  3. Branche le callback de réception de paquets sur ce contrôleur
+     *  4. Demande la liste des utilisateurs au serveur
+     */
     public void init(String username, SocketService service) {
         this.currentUser = username;
         this.socketService = service;
@@ -159,12 +195,13 @@ public class ChatController {
         }
         loadLocalHistory();
 
+        // Remplace le callback d'AuthController par celui de ChatController
         socketService.setOnPacketReceived(this::handlePacket);
 
         showLoadingState();
         socketService.requestUsers(currentUser);
 
-        // Statut personnel : En ligne
+        // Indique visuellement que l'utilisateur courant est en ligne
         if (userStatusDot != null) {
             userStatusDot.setFill(Color.web("#2ecc71"));
         }
@@ -735,6 +772,13 @@ public class ChatController {
     // UTILITAIRES
     // ═══════════════════════════════════════════════════════
 
+    /**
+     * Ajoute un message à l'historique en mémoire, sauvegarde sur disque,
+     * et met à jour le preview dans la liste des contacts.
+     *
+     * Contient une protection contre les doublons : si le serveur renvoie deux fois
+     * le même message (re-livraison), on ne l'ajoute qu'une seule fois.
+     */
     private void recordMessage(String peer, ChatMessage msg) {
         List<ChatMessage> msgs = history.computeIfAbsent(peer, k -> new ArrayList<>());
 
@@ -742,9 +786,7 @@ public class ChatController {
         if (!msgs.isEmpty()) {
             ChatMessage last = msgs.get(msgs.size() - 1);
             if (last.from().equals(msg.from()) && last.content().equals(msg.content())) {
-                // On peut aussi comparer le timestamp si nécessaire, mais le contenu +
-                // expéditeur
-                // suffit pour les messages "re-livrés" par erreur.
+                // contenu + expéditeur suffisent pour détecter les re-livraisons
                 return;
             }
         }
@@ -797,6 +839,10 @@ public class ChatController {
         return sp;
     }
 
+    /**
+     * Génère les initiales à partir d'un nom ou username.
+     * Ex: "Amadou Ba" → "AB", "alice_dev" → "AD", "alice" → "AL"
+     */
     private static String initials(String name) {
         String[] parts = name.split("[\\s._-]+");
         if (parts.length >= 2)
@@ -804,6 +850,7 @@ public class ChatController {
         return name.substring(0, Math.min(2, name.length())).toUpperCase();
     }
 
+    /** Retourne l'heure actuelle formatée HH:mm (ex. "14:35"). */
     private static String now() {
         return LocalTime.now().format(TIME_FMT);
     }

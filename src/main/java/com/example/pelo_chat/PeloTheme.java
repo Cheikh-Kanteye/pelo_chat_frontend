@@ -17,23 +17,17 @@ import java.util.Objects;
 
 /**
  * PELO Design System — Utilitaire JavaFX
- * <p>
- * Usage minimal :
- * <pre>
- *   PeloTheme.applyTo(scene);
- *   Button btn = PeloTheme.primaryButton("Envoyer");
- * </pre>
  *
- * @version 1.0
+ * Usage minimal :
+ * PeloTheme.applyTo(scene);
+ * Button btn = PeloTheme.primaryButton("Envoyer");
  */
 public final class PeloTheme {
 
     private PeloTheme() {}
 
-    // ═══════════════════════════════════════════════════════
-    //  STYLESHEET
-    // ═══════════════════════════════════════════════════════
 
+    //  STYLESHEET
     /** URL externe du stylesheet à passer à Scene.getStylesheets() */
     public static final String STYLESHEET = Objects.requireNonNull(
             PeloTheme.class.getResource("pelo-theme.css"),
@@ -54,10 +48,7 @@ public final class PeloTheme {
         }
     }
 
-    // ═══════════════════════════════════════════════════════
     //  COLORS — Palette complète PELO
-    // ═══════════════════════════════════════════════════════
-
     /**
      * Constantes de couleurs (hex strings + objets Color JavaFX).
      * Utiliser les hex strings pour les inline styles,
@@ -114,10 +105,7 @@ public final class PeloTheme {
         private Colors() {}
     }
 
-    // ═══════════════════════════════════════════════════════
     //  SPACING — Valeurs d'espacement
-    // ═══════════════════════════════════════════════════════
-
     public static final class Spacing {
         public static final double XS  = 4;
         public static final double SM  = 8;
@@ -136,10 +124,7 @@ public final class PeloTheme {
         private Spacing() {}
     }
 
-    // ═══════════════════════════════════════════════════════
     //  RADIUS — Rayons de bordure
-    // ═══════════════════════════════════════════════════════
-
     public static final class Radius {
         public static final double SM     = 8;
         public static final double MD     = 10;
@@ -151,10 +136,7 @@ public final class PeloTheme {
         private Radius() {}
     }
 
-    // ═══════════════════════════════════════════════════════
     //  FONT SIZES
-    // ═══════════════════════════════════════════════════════
-
     public static final class FontSize {
         public static final double MICRO  = 9;
         public static final double XS     = 10;
@@ -168,10 +150,7 @@ public final class PeloTheme {
         private FontSize() {}
     }
 
-    // ═══════════════════════════════════════════════════════
     //  CSS CLASS NAMES — Constantes pour éviter les typos
-    // ═══════════════════════════════════════════════════════
-
     public static final class Styles {
 
         // Buttons
@@ -262,10 +241,7 @@ public final class PeloTheme {
         private Styles() {}
     }
 
-    // ═══════════════════════════════════════════════════════
     //  COMPONENT FACTORIES
-    // ═══════════════════════════════════════════════════════
-
     // ── Boutons ─────────────────────────────────────────────
 
     /** Bouton principal vert avec shadow. */

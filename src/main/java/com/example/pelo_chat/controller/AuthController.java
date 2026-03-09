@@ -48,6 +48,8 @@ public class AuthController {
     @FXML
     private HBox rememberMeContainer;
 
+    // Fichier texte (.properties) qui stocke les identifiants pour la connexion automatique.
+    // Format : username=xxx \n password=xxx (en clair — usage local uniquement)
     private static final String SESSION_FILE = System.getProperty("user.home") + "/.pelo_session";
 
     private final SocketService socketService = new SocketService();
@@ -120,6 +122,14 @@ public class AuthController {
     // LOGIQUE MÉTIER
     // ═══════════════════════════════════════════════════════
 
+    /**
+     * Lance la tentative de connexion :
+     *  1. Ouvre le socket TCP vers le serveur
+     *  2. Envoie le paquet LOGIN
+     *  3. Attend la réponse (ACK = succès, autre = erreur avec message)
+     *  4. Si "Se souvenir de moi" coché → sauvegarde les identifiants localement
+     *  5. Navigue vers l'écran de chat
+     */
     private void handleLogin() {
         String username = usernameField.getText().trim();
         if (username.isEmpty() || passwordField.getText().isEmpty()) {
@@ -177,6 +187,11 @@ public class AuthController {
         }
     }
 
+    /**
+     * Charge chat.fxml, passe le socketService au ChatController, puis
+     * remplace la scène d'auth par la scène de chat sur la même fenêtre.
+     * Le socketService est réutilisé (connexion déjà ouverte, pas de reconnexion).
+     */
     private void navigateToChat(String username) {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -199,6 +214,11 @@ public class AuthController {
 
     // ── Session Management ────────────────────────────────
 
+    /**
+     * Tente une connexion automatique si ~/.pelo_session existe.
+     * Appelée via Platform.runLater() dans initialize() pour laisser
+     * le temps au FXML de finir de se charger avant d'interagir avec les champs.
+     */
     private void attemptAutoLogin() {
         Properties props = loadSession();
         if (props == null)
@@ -211,7 +231,7 @@ public class AuthController {
             usernameField.setText(user);
             passwordField.setText(pass);
             rememberMeCheck.setSelected(true);
-            handleLogin();
+            handleLogin(); // Connexion transparente pour l'utilisateur
         }
     }
 
